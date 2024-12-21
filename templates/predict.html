@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Loan Eligibility - Loan Eligibility App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Enter Details to Check Loan Eligibility</h1>
+    <form action="{{ url_for('predict') }}" method="POST">
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="0">Male</option>
+            <option value="1">Female</option>
+        </select>
+        <br><br>
+
+        <label for="married">Marital Status:</label>
+        <select id="married" name="married" required>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+        <br><br>
+
+        <label for="dependents">Dependents:</label>
+        <input type="number" id="dependents" name="dependents" required min="0">
+        <br><br>
+
+        <label for="self_employed">Self Employed:</label>
+        <select id="self_employed" name="self_employed" required>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+        <br><br>
+
+        <label for="education">Education:</label>
+        <select id="education" name="education" required>
+            <option value="1">Graduate</option>
+            <option value="0">Undergraduate</option>
+        </select>
+        <br><br>
+
+        <label for="income">Applicant Income ($):</label>
+        <input type="number" id="income" name="income" required>
+        <br><br>
+
+        <label for="co_income">Co-Applicant Income ($):</label>
+        <input type="number" id="co_income" name="co_income" required>
+        <br><br>
+
+        <label for="loan_amount">Loan Amount ($):</label>
+        <input type="number" id="loan_amount" name="loan_amount" required>
+        <br><br>
+
+        <label for="loan_term">Loan Term (Months):</label>
+        <input type="number" id="loan_term" name="loan_term" required min="1">
+        <br><br>
+
+        <label for="credit_history">Credit History:</label>
+        <select id="credit_history" name="credit_history" required>
+            <option value="0">No</option>
+            <option value="1">Yes</option>
+        </select>
+        <br><br>
+
+        <label for="property_area">Property Area:</label>
+        <select id="property_area" name="property_area" required>
+            <option value="0">Urban</option>
+            <option value="1">Semi-Urban</option>
+            <option value="2">Rural</option>
+        </select>
+        <br><br>
+
+        <button type="submit">Predict</button>
+    </form>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>

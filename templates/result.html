@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Eligibility Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Loan Eligibility Prediction</h1>
+    <h2>{{ result }}</h2>
+    <p><a href="{{ url_for('predict') }}">Try Again</a></p>
+    <p><a href="{{ url_for('logout') }}">Logout</a></p>
+</body>
+</html>

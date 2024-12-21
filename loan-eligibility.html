@@ -1,0 +1,157 @@
+<html>
+<head>
+<title>loan-eligibility.ipynb</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #7a7e85;}
+.s1 { color: #bcbec4;}
+.s2 { color: #cf8e6d;}
+.s3 { color: #bcbec4;}
+.s4 { color: #6aab73;}
+.s5 { color: #2aacb8;}
+.ls0 { height: 1px; border-width: 0; color: #43454a; background-color:#43454a}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+loan-eligibility.ipynb</font>
+</center></td></tr></table>
+<pre><span class="s0">#%% md 
+</span><span class="s1"># 1. Import required libraries and read the dataset <hr class="ls0"></span><span class="s0">#%% 
+# Importing necessary libraries</span>
+<span class="s2">import </span><span class="s1">pandas </span><span class="s2">as </span><span class="s1">pd</span>
+<span class="s2">import </span><span class="s1">numpy </span><span class="s2">as </span><span class="s1">np</span>
+<span class="s2">import </span><span class="s1">matplotlib</span><span class="s3">.</span><span class="s1">pyplot </span><span class="s2">as </span><span class="s1">plt</span>
+<span class="s2">import </span><span class="s1">seaborn </span><span class="s2">as </span><span class="s1">sns</span>
+<span class="s2">from </span><span class="s1">sklearn</span><span class="s3">.</span><span class="s1">model_selection </span><span class="s2">import </span><span class="s1">train_test_split</span>
+<span class="s2">from </span><span class="s1">sklearn</span><span class="s3">.</span><span class="s1">preprocessing </span><span class="s2">import </span><span class="s1">LabelEncoder</span>
+<span class="s2">from </span><span class="s1">sklearn</span><span class="s3">.</span><span class="s1">ensemble </span><span class="s2">import </span><span class="s1">RandomForestClassifier</span>
+<span class="s2">import </span><span class="s1">pickle</span>
+<hr class="ls0"><span class="s0">#%% 
+# Reading the dataset</span>
+<span class="s1">data_set</span><span class="s3">=</span><span class="s4">&quot;./data/loan_approval_data.csv&quot;</span>
+<span class="s1">df </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s1">data_set</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+# Displaying the first few rows of the dataset</span>
+<span class="s1">df</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% md 
+ </span><span class="s1"># 2. Check the first few samples, shape, info of the data and try to familiarize yourself with different features <hr class="ls0"></span><span class="s0">#%% 
+# Checking the shape of the dataset</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Shape of dataset:&quot;</span><span class="s3">)</span>
+<span class="s1">df</span><span class="s3">.</span><span class="s1">shape</span>
+<hr class="ls0"><span class="s0">#%% 
+</span>
+<span class="s0"># Info to check data types and null values</span>
+<span class="s1">df</span><span class="s3">.</span><span class="s1">info</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# Display first few rows</span>
+<span class="s1">df</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% md 
+</span><span class="s1"># 3. Check for missing values in the dataset, if present? handle them with appropriate methods and drop redundant features <hr class="ls0"></span><span class="s0">#%% 
+</span><span class="s1">df</span><span class="s3">.</span><span class="s1">isnull</span><span class="s3">().</span><span class="s1">sum</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# Since here gender needs to be treated first, let us clean the data set as follows:</span>
+<span class="s1">data_cleaned </span><span class="s3">= </span><span class="s1">df</span><span class="s3">[</span><span class="s1">df</span><span class="s3">[</span><span class="s4">'gender'</span><span class="s3">] != </span><span class="s4">'NA'</span><span class="s3">]</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">data_cleaned</span><span class="s3">.</span><span class="s1">dropna</span><span class="s3">(</span><span class="s1">subset</span><span class="s3">=[</span><span class="s4">'gender'</span><span class="s3">])</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">isnull</span><span class="s3">().</span><span class="s1">sum</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">dropna</span><span class="s3">(</span><span class="s1">subset</span><span class="s3">=[</span><span class="s4">'married'</span><span class="s3">, </span><span class="s4">'dependents'</span><span class="s3">, </span><span class="s4">'self_employed'</span><span class="s3">, </span><span class="s4">'loanamount'</span><span class="s3">, </span><span class="s4">'loan_amount_term'</span><span class="s3">])</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">isnull</span><span class="s3">().</span><span class="s1">sum</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">drop_duplicates</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">shape</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">dtypes</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">new_data_set </span><span class="s3">= </span><span class="s4">&quot;./data/cleaned_loan_data.csv&quot;</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">to_csv</span><span class="s3">(</span><span class="s1">new_data_set</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+# Dropping redundant or irrelevant columns if any</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">drop</span><span class="s3">(</span><span class="s1">columns</span><span class="s3">=[</span><span class="s4">'loan_id'</span><span class="s3">], </span><span class="s1">inplace</span><span class="s3">=</span><span class="s2">True</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+# Verify if missing values are handled</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">isnull</span><span class="s3">().</span><span class="s1">sum</span><span class="s3">())</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">dropna</span><span class="s3">(</span><span class="s1">subset</span><span class="s3">=[</span><span class="s4">'credit_history'</span><span class="s3">])</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">print</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">isnull</span><span class="s3">().</span><span class="s1">sum</span><span class="s3">())</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">print</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">shape</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">new_data_set </span><span class="s3">= </span><span class="s4">&quot;./data/new_loan_data.csv&quot;</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">to_csv</span><span class="s3">(</span><span class="s1">new_data_set</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% md 
+</span><span class="s1"># 4. Visualize the distribution of the target column 'loan_status' with respect to various categorical features and write your observations 
+ <hr class="ls0"></span><span class="s0">#%% 
+# Visualizing the distribution of loan status with respect to categorical features</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">countplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">df_new</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'loan_status'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Distribution of Loan Status'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+
+<span class="s0"># Observing Loan Status based on different features</span>
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">countplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">df_new</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'gender'</span><span class="s3">, </span><span class="s1">hue</span><span class="s3">=</span><span class="s4">'loan_status'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Loan Status by Gender'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+
+<span class="s1">sns</span><span class="s3">.</span><span class="s1">countplot</span><span class="s3">(</span><span class="s1">data</span><span class="s3">=</span><span class="s1">df_new</span><span class="s3">, </span><span class="s1">x</span><span class="s3">=</span><span class="s4">'education'</span><span class="s3">, </span><span class="s1">hue</span><span class="s3">=</span><span class="s4">'loan_status'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">title</span><span class="s3">(</span><span class="s4">'Loan Status by Education'</span><span class="s3">)</span>
+<span class="s1">plt</span><span class="s3">.</span><span class="s1">show</span><span class="s3">()</span>
+
+<span class="s0"># Further visualizations can be done similarly.</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">pd</span><span class="s3">.</span><span class="s1">read_csv</span><span class="s3">(</span><span class="s4">'./data/new_loan_data.csv'</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">shape</span><hr class="ls0"><span class="s0">#%% 
+</span><hr class="ls0"><span class="s0">#%% md 
+</span><span class="s1"># 5. Encode the categorical data <hr class="ls0"></span><span class="s0">#%% 
+# Using LabelEncoder to encode categorical variables</span>
+<span class="s1">le </span><span class="s3">= </span><span class="s1">LabelEncoder</span><span class="s3">()</span>
+
+<span class="s0"># Encoding categorical columns</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'gender'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'gender'</span><span class="s3">])</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'married'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'married'</span><span class="s3">])</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'self_employed'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'self_employed'</span><span class="s3">])</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'education'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'education'</span><span class="s3">])</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'credit_history'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'credit_history'</span><span class="s3">])</span>
+<span class="s1">df_new</span><span class="s3">.</span><span class="s1">loc</span><span class="s3">[:, </span><span class="s4">'property_area'</span><span class="s3">] = </span><span class="s1">le</span><span class="s3">.</span><span class="s1">fit_transform</span><span class="s3">(</span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'property_area'</span><span class="s3">])</span>
+<span class="s0">#df_new.loc[:, 'loan_status'] = le.fit_transform(df_new['loan_status'])</span>
+
+<span class="s0"># Check the encoded dataset</span>
+<span class="s1">df</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span>
+<hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">dtypes</span><hr class="ls0"><span class="s0">#%% md 
+</span><span class="s1"># 6. Separate the target and independent features and split the data into train and test <hr class="ls0"></span><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">reset_index</span><span class="s3">(</span><span class="s1">drop</span><span class="s3">=</span><span class="s2">True</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">drop</span><span class="s3">(</span><span class="s1">columns</span><span class="s3">=[</span><span class="s4">'Unnamed: 0'</span><span class="s3">])</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">shape</span><hr class="ls0"><span class="s0">#%% 
+# Separating features (independent variables) and target (dependent variable)</span>
+<span class="s1">X </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">.</span><span class="s1">drop</span><span class="s3">(</span><span class="s1">columns</span><span class="s3">=[</span><span class="s4">'loan_status'</span><span class="s3">])</span>
+<span class="s1">y </span><span class="s3">= </span><span class="s1">df_new</span><span class="s3">[</span><span class="s4">'loan_status'</span><span class="s3">]</span><hr class="ls0"><span class="s0">#%% 
+# Split the dataset into training and testing sets (80% train, 20% test)</span>
+<span class="s1">X_train</span><span class="s3">, </span><span class="s1">X_test</span><span class="s3">, </span><span class="s1">y_train</span><span class="s3">, </span><span class="s1">y_test </span><span class="s3">= </span><span class="s1">train_test_split</span><span class="s3">(</span><span class="s1">X</span><span class="s3">, </span><span class="s1">y</span><span class="s3">, </span><span class="s1">test_size</span><span class="s3">=</span><span class="s5">0.2</span><span class="s3">, </span><span class="s1">random_state</span><span class="s3">=</span><span class="s5">0</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+# Check the shapes of train and test sets</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s1">X_train</span><span class="s3">.</span><span class="s1">shape</span><span class="s3">, </span><span class="s1">X_test</span><span class="s3">.</span><span class="s1">shape</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% md 
+</span><span class="s1"># 7. Build any classification model to predict the loan status of the customer and save your model using pickle <hr class="ls0"></span><span class="s0">#%% 
+</span><span class="s1">X_train</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% 
+</span><span class="s1">y_train</span><span class="s3">.</span><span class="s1">head</span><span class="s3">()</span><hr class="ls0"><span class="s0">#%% 
+# Assuming 'Loan_Status' is the target variable</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s1">y_train</span><span class="s3">.</span><span class="s1">unique</span><span class="s3">())  </span><span class="s0"># Check unique values in the target column</span>
+<hr class="ls0"><span class="s0">#%% 
+# Build a Random Forest Classifier model</span>
+<span class="s1">model </span><span class="s3">= </span><span class="s1">RandomForestClassifier</span><span class="s3">(</span><span class="s1">n_estimators</span><span class="s3">=</span><span class="s5">10</span><span class="s3">, </span><span class="s1">random_state</span><span class="s3">=</span><span class="s5">0</span><span class="s3">)</span>
+<span class="s1">model</span><span class="s3">.</span><span class="s1">fit</span><span class="s3">(</span><span class="s1">X_train</span><span class="s3">, </span><span class="s1">y_train</span><span class="s3">)</span>
+<hr class="ls0"><span class="s0">#%% 
+# Evaluate the model</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">f&quot;Accuracy on test set: </span><span class="s2">{</span><span class="s1">model</span><span class="s3">.</span><span class="s1">score</span><span class="s3">(</span><span class="s1">X_test</span><span class="s3">, </span><span class="s1">y_test</span><span class="s3">)</span><span class="s2">}</span><span class="s4">&quot;</span><span class="s3">)</span><hr class="ls0"><span class="s0">#%% 
+# Saving the trained model using pickle</span>
+<span class="s1">loan_model </span><span class="s3">= </span><span class="s4">&quot;./models/loan_eligibility_model.pkl&quot;</span>
+<span class="s2">with </span><span class="s1">open</span><span class="s3">(</span><span class="s1">loan_model</span><span class="s3">, </span><span class="s4">'wb'</span><span class="s3">) </span><span class="s2">as </span><span class="s1">file</span><span class="s3">:</span>
+    <span class="s1">pickle</span><span class="s3">.</span><span class="s1">dump</span><span class="s3">(</span><span class="s1">model</span><span class="s3">, </span><span class="s1">file</span><span class="s3">)</span>
+<span class="s1">file</span><span class="s3">.</span><span class="s1">close</span><span class="s3">()</span>
+<span class="s1">print</span><span class="s3">(</span><span class="s4">&quot;Model saved successfully!&quot;</span><span class="s3">)</span>
+</pre>
+</body>
+</html>
